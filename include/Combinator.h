@@ -9,32 +9,6 @@
 namespace pcomb
 {
 
-// The AltParser combinator applies two parser (p0, p1) in turn. If p0 succeeds, it returns what p0 returns; otherwise, it returns what p1 returns.
-template <typename ParserA, typename ParserB>
-class AltParser
-{
-private:
-	ParserA pa;
-	ParserB pb;
-public:
-	static_assert(IsParser<ParserA>::value, "AltParser only accepts parser type");
-	static_assert(IsParser<ParserB>::value, "AltParser only accepts parser type");
-	static_assert(MoreGeneralType<ParserAttrType<ParserA>, ParserAttrType<ParserB>>::exist, "AltParser's subparsers must be compatible!");
-
-	using AttrType = typename MoreGeneralType<ParserAttrType<ParserA>, ParserAttrType<ParserB>>::type;
-
-	AltParser(ParserA a, ParserB b): pa(std::move(a)), pb(std::move(b)) {}
-
-	ParseResult<AttrType> parse(StringRef str) const
-	{
-		auto paResult = pa.parse(str);
-		if (paResult)
-			return std::move(*paResult);
-		
-		return pb.parse(str);
-	}
-};
-
 // The SeqParser combinator applies multiple parsers (p0, p1, p2, ...) consequtively. If p0 succeeds, it parse the rest of the input string with (p1, p2, ...). If one of the parsers fails, the entire combinator fails. Otherwise, return the result in a tuple
 // This is literally the most brain-burning part of this library. You can see that there are LOTS of template metaprogramming going on here and making sure that all of them works is REALLY hard. Even simple tasks like fmap on the type of a tuple require me to craft a recursion somehow with TMP... The good thing is that we have decltype and declval, which save some work.
 template <typename ...Parsers>
@@ -110,6 +84,70 @@ public:
 	ParseResult<AttrType> parse(StringRef str) const
 	{
 		return SeqNParserImpl<std::tuple<Parsers...>, sizeof...(Parsers)>::parse(parsers, str);
+	}
+};
+
+// The AltParser combinator applies multiple parser (p0, p1, p2, ...) in turn. If p0 succeeds, it returns what p0 returns; otherwise, it tries p1 and return what p1 returns if it succeeds; otherwise, try p2, and so on
+// This class still needs lots of template metaprogramming. But it's easier than SeqParser becuase we have a stronger requirement on its template parameters (they must have compatible attribute types)
+template <typename ...Parsers>
+class AltParser
+{
+private:
+	std::tuple<Parsers...> parsers;
+
+	template <typename Tuple, size_t I>
+	struct AttrTypeImpl
+	{
+	private:
+		using PrevType = typename AttrTypeImpl<Tuple, I-1>::type;
+		using ElemType = std::tuple_element_t<I-1, Tuple>;
+		static_assert(IsParser<ElemType>::value, "AltParser only accepts parser type");
+		using CurrType = ParserAttrType<ElemType>;
+	public:
+		static_assert(MoreGeneralType<PrevType, CurrType>::exist, "AltParser's subparsers must be compatible!");
+		using type = typename MoreGeneralType<PrevType, CurrType>::type;
+	};
+	template <typename Tuple>
+	struct AttrTypeImpl<Tuple, 1>
+	{
+	private:
+		using ElemType = std::tuple_element_t<0, Tuple>;
+	public:
+		static_assert(IsParser<ElemType>::value, "AltParser only accepts parser type");
+		using type = ParserAttrType<ElemType>;
+	};
+
+	template <typename Tuple, size_t I>
+	struct AltNParserImpl
+	{
+		static auto parse(const Tuple& t, const StringRef& str)
+		{
+			auto constexpr tupleId = std::tuple_size<Tuple>::value - I;
+			auto res = std::get<tupleId>(t).parse(str);
+			if (res)
+				return std::experimental::make_optional(std::move(*res));
+			else
+				return AltNParserImpl<Tuple, I-1>::parse(t, str);
+		}
+	};
+
+	template <typename Tuple>
+	struct AltNParserImpl<Tuple, 1>
+	{
+		static auto parse(const Tuple& t, const StringRef& str)
+		{
+			auto constexpr tupleId = std::tuple_size<Tuple>::value - 1;
+			return std::get<tupleId>(t).parse(str);
+		}
+	};
+public:
+	AltParser(Parsers... ps): parsers(std::forward_as_tuple(ps...)) {}
+
+	using AttrType = typename AttrTypeImpl<decltype(parsers), sizeof...(Parsers)>::type;
+
+	ParseResult<AttrType> parse(StringRef str) const
+	{
+		return AltNParserImpl<std::tuple<Parsers...>, sizeof...(Parsers)>::parse(parsers, str);
 	}
 };
 
@@ -276,10 +314,10 @@ public:
 	}
 };
 
-template <typename ParserA, typename ParserB>
-AltParser<ParserA, ParserB> alt(ParserA p0, ParserB p1)
+template <typename ...Parsers>
+AltParser<Parsers...> alt(Parsers... parsers)
 {
-	return AltParser<ParserA, ParserB>(std::move(p0), std::move(p1));
+	return AltParser<Parsers...>(std::move(parsers)...);
 }
 
 template <typename ...Parsers>

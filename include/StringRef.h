@@ -50,7 +50,7 @@ private:
 	}
 
 	size_t findFirstNotOf(const StringRef& chars, size_t from = 0) const;
-	size_t findLastNotOf(const StringRef& chars, size_t from = 0) const;
+	size_t findLastNotOf(const StringRef& chars, size_t from = npos) const;
 public:
 	using iterator = const char*;
 	using const_iterator = const char*;
