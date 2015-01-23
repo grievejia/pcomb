@@ -26,8 +26,3 @@ set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 # Recurse into the "lib" and "tools" subdirectories. This does not actually cause another cmake executable to run. The same process will walk through the project's entire directory structure. 
 add_subdirectory (lib) 
 add_subdirectory (examples)
-add_subdirectory (unit-test)
-
-# Inform CTest what test programs we have built
-enable_testing ()
-add_test (UnitTest ${PROJECT_BINARY_DIR}/unit-test/UnitTest)
