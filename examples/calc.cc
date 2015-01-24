@@ -55,26 +55,14 @@ public:
 };
 
 // Grammar of the calculator
-auto digit = range('0', '9');
-auto unum = rule
+auto inum = rule
 (
-	token(many(digit, true)),
-	[] (auto const& digits) -> long
+	token(regex("[+-]?\\d+")),
+	[] (auto digits) -> long
 	{
-		auto numStr = std::string(digits.begin(), digits.end());
-		return std::stoul(numStr);
+		return std::stoul(digits.str());
 	}
 );
-auto nnum = rule
-(
-	token(seq(ch('-'), unum)),
-	[] (auto const& pair)
-	{
-		long n= std::get<long>(pair);
-		return -n;
-	}
-);
-auto inum = alt(unum, nnum);
 
 auto expr0 = LazyParser<ExprPtr>();
 

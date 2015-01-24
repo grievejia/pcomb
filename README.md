@@ -18,7 +18,8 @@ using namespace pcomb;
 auto matchAChar = ch('a');
 auto matchAString = str("string");
 auto matchARangeOfChar = range('a', 'z');
-auto matchAToken = token(str("token"));  // Ignore preceding whitespaces before the string
+auto matchANumber = regex("[+-]?\\d+");  // the given regex should be in  ECMAScript syntax
+auto matchAToken = token(str("token"));  // token() gnore preceding whitespaces before parsing the input 
 ```
 
 * Combinators
@@ -38,8 +39,6 @@ auto matchOneOrMoreB = many(ch('B'), true);
 ```
 
 * Parser attributes
-
-* Combinators
 ```c++
 #include "BasicParser.h"
 #include "Combinator.h"
@@ -54,6 +53,28 @@ auto matchNumber = rule(
 	}
 }
 );
+```
+
+* Recursive grammars
+```c++
+#include "BasicParser.h"
+#include "Combinator.h"
+
+using namespace pcomb;
+
+// In C++, a variable cannot be used to initialize itself.
+// This is why when we have a recursive non-terminal we need to declare it first before we fill in the details later
+auto parenChar0 = LazyParser<char>();
+
+auto charOrAnotherParen = alt(
+	ch([] { return true; }),
+	rule(
+		seq('(', parenChar0, ')'),
+		[] (auto triple) { return std::get<char>(triple); }
+	)
+);
+
+auto& parenChar = parenChar0.set(charOrAnotherParen);
 ```
 
 ## Compilers support

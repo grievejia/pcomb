@@ -3,6 +3,8 @@
 
 #include "ParserTypes.h"
 
+#include <regex>
+
 namespace pcomb
 {
 
@@ -16,12 +18,38 @@ public:
 
 	StringParser(const StringRef& s): pattern(s) {}
 
-	ParseResult<AttrType> parse(StringRef str) const
+	ParseResult<AttrType> parse(const StringRef& str) const
 	{
+		auto ret = ParseResult<AttrType>();
 		if (str.startswith(pattern))
-			return std::experimental::make_optional(std::make_pair(pattern, str.dropFront(pattern.size())));
-		else
-			return ParseResult<AttrType>();
+			ret = std::make_pair(pattern, str.dropFront(pattern.size()));
+		
+		return ParseResult<AttrType>();
+	}
+};
+
+// RegexParser takes a StringRef as regex and mathes the start of the input string against that regex.
+// RegexParser is strictly more powerful than StringParser. But I would expect that StringParser is cheaper.
+class RegexParser
+{
+private:
+	StringRef regexStr;
+public:
+	using AttrType = StringRef;
+
+	RegexParser(const StringRef& r): regexStr(r) {}
+
+	ParseResult<AttrType> parse(const StringRef& str) const
+	{
+		auto ret = ParseResult<AttrType>();
+
+		auto regex = std::regex(regexStr.raw_pointer());
+		auto res = std::cmatch();
+
+		if (std::regex_search(str.raw_pointer(), res, regex, std::regex_constants::match_continuous))
+			ret = std::make_pair(StringRef(res[0]), str.dropFront(res.length(0)));
+		
+		return ret;
 	}
 };
 
@@ -38,7 +66,7 @@ public:
 
 	PredicateCharParser(Pred&& p): pred(std::move(p)) {}
 
-	ParseResult<AttrType> parse(StringRef str) const
+	ParseResult<AttrType> parse(const StringRef& str) const
 	{
 		if (!str.empty() && pred(str[0]))
 			return std::experimental::make_optional(std::make_pair(str[0], str.dropFront()));
@@ -84,6 +112,13 @@ PredicateCharParser<CharEqPredicate> ch(char c)
 	return PredicateCharParser<CharEqPredicate>(CharEqPredicate(c));
 }
 
+// The enable_if here is to avoid instantiating this template when CustomPredicate is char
+template <typename CustomPredicate>
+std::enable_if_t<!std::is_same<CustomPredicate, char>::value, PredicateCharParser<CustomPredicate>> ch(CustomPredicate p)
+{
+	return PredicateCharParser<CustomPredicate>(std::move(p));
+}
+
 PredicateCharParser<CharRangePredicate> range(char l, char h)
 {
 	return PredicateCharParser<CharRangePredicate>(CharRangePredicate(l, h));
@@ -92,6 +127,11 @@ PredicateCharParser<CharRangePredicate> range(char l, char h)
 StringParser str(const StringRef& s)
 {
 	return StringParser(s);
+}
+
+RegexParser regex(const StringRef& s)
+{
+	return RegexParser(s);
 }
 
 }
