@@ -18,7 +18,7 @@ using namespace pcomb;
 auto matchAChar = ch('a');
 auto matchAString = str("string");
 auto matchARangeOfChar = range('a', 'z');
-auto matchANumber = regex("[+-]?\\d+");  // the given regex should be in  ECMAScript syntax
+auto matchANumber = regex("[+-]?\\d+");  // the given regex should be in ECMAScript syntax
 auto matchAToken = token(str("token"));  // token() gnore preceding whitespaces before parsing the input 
 ```
 

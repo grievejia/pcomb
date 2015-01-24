@@ -24,7 +24,7 @@ public:
 		if (str.startswith(pattern))
 			ret = std::make_pair(pattern, str.dropFront(pattern.size()));
 		
-		return ParseResult<AttrType>();
+		return ret;
 	}
 };
 
@@ -107,7 +107,7 @@ public:
 	}
 };
 
-PredicateCharParser<CharEqPredicate> ch(char c)
+inline PredicateCharParser<CharEqPredicate> ch(char c)
 {
 	return PredicateCharParser<CharEqPredicate>(CharEqPredicate(c));
 }
@@ -119,17 +119,17 @@ std::enable_if_t<!std::is_same<CustomPredicate, char>::value, PredicateCharParse
 	return PredicateCharParser<CustomPredicate>(std::move(p));
 }
 
-PredicateCharParser<CharRangePredicate> range(char l, char h)
+inline PredicateCharParser<CharRangePredicate> range(char l, char h)
 {
 	return PredicateCharParser<CharRangePredicate>(CharRangePredicate(l, h));
 }
 
-StringParser str(const StringRef& s)
+inline StringParser str(const StringRef& s)
 {
 	return StringParser(s);
 }
 
-RegexParser regex(const StringRef& s)
+inline RegexParser regex(const StringRef& s)
 {
 	return RegexParser(s);
 }
