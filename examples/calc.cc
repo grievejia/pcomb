@@ -1,5 +1,5 @@
-#include "BasicParser.h"
-#include "Combinator.h"
+#include "pcomb.h"
+#include "InputStream/StringInputStream.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -60,11 +60,11 @@ auto inum = rule
 	token(regex("[+-]?\\d+")),
 	[] (auto digits) -> long
 	{
-		return std::stoul(digits.str());
+		return std::stoul(digits.to_string());
 	}
 );
 
-auto expr0 = LazyParser<ExprPtr>();
+auto expr0 = LazyParser<StringInputStream, ExprPtr>();
 
 auto nexpr = alt
 (
@@ -111,22 +111,29 @@ auto term = rule
 
 auto& expr = expr0.setParser(term);
 
-void parseLine(StringRef line)
+void parseLine(const std::string& line)
 {
-	auto parseResult = expr.parse(line);
-	if (!parseResult)
+	StringInputStream ss(line);
+	auto parseResult = expr.parse(ss);
+	if (parseResult.hasError())
 	{
 		std::cout << "Parsing failed\n";
 		return;
 	}
 
-	if (!parseResult->second.rstrip().empty())
+	auto lstrip = [] (std::experimental::string_view inputStrView)
 	{
-		std::cout << "Excessive input: " << parseResult->second.str() << "\n";
+		return inputStrView.substr(std::min(inputStrView.size(), inputStrView.find_first_not_of(" \t\n\v\f\r")));
+	};
+
+	auto remainingBuffer = parseResult.getInputStream().getRawBuffer();
+	if (!lstrip(remainingBuffer).empty())
+	{
+		std::cout << "Excessive input: " << remainingBuffer << "\n";
 		return;
 	}
 
-	std::cout << "Result = " << parseResult->first->eval() << "\n";
+	std::cout << "Result = " << parseResult.getAttribute()->eval() << "\n";
 }
 
 int main()
