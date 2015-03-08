@@ -11,7 +11,7 @@ class StringInputStream
 private:
 	std::experimental::string_view str;
 
-	StringInputStream(std::experimental::string_view s): str(s) {}
+	StringInputStream(const std::experimental::string_view& s): str(s) {}
 public:
 	StringInputStream(const char* s): str(s) {}
 	StringInputStream(const std::string& s): str(s) {}
@@ -28,7 +28,7 @@ public:
 
 	StringInputStream consume(size_t n) const
 	{
-		// throw std::out_of_range if n > str.size()
+		assert(n <= str.size());
 		return StringInputStream(str.substr(n));
 	}
 };

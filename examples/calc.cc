@@ -64,7 +64,7 @@ auto inum = rule
 	}
 );
 
-auto expr0 = LazyParser<StringInputStream, ExprPtr>();
+auto expr0 = LazyParser<ExprPtr>();
 
 auto nexpr = alt
 (

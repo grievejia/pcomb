@@ -53,8 +53,8 @@ using namespace pcomb;
 
 // In C++, a variable cannot be used to initialize itself.
 // This is why when we have a recursive non-terminal we need to declare it first before we fill in the details later
-// Currently you must specify the input type as well as the attribute type of the LazyParser
-auto parenChar0 = LazyParser<StringInputStream, char>();
+// You must explicitly specify the attribute type when you create a LazyParser
+auto parenChar0 = LazyParser<char>();
 
 auto charOrAnotherParen = alt(
 	ch([] { return true; }),
