@@ -25,7 +25,7 @@ public:
 	{
 		static_assert(IsInputStream<InputStream>::value, "Parser's input type must be an InputStream!");
 
-		auto ret = ParseResult<InputStream, AttrType>();
+		auto ret = ParseResult<InputStream, AttrType>(input);
 
 		auto inputView = std::experimental::string_view(input.getRawBuffer(), pattern.size());
 		if (pattern.compare(inputView) == 0)

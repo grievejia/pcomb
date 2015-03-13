@@ -49,7 +49,7 @@ private:
 			using PrevParserAttrTypes = std::decay_t<decltype(prevRes.getAttribute())>;
 			using CurrentParserAttrTypes = decltype(std::tuple_cat(std::declval<PrevParserAttrTypes>(), std::make_tuple(std::declval<CurrentParserAttrType>())));
 
-			auto ret = ParseResult<InputStream, CurrentParserAttrTypes>();
+			auto ret = ParseResult<InputStream, CurrentParserAttrTypes>(input);
 			if (prevRes.success())
 			{
 				auto curRes = std::get<I-1>(t).parse(prevRes.getInputStream());
@@ -72,7 +72,7 @@ private:
 			using CurrentParserAttrTypes = std::tuple<CurrentParserAttrType>;
 
 			auto res = std::get<0>(t).parse(input);
-			auto ret = ParseResult<InputStream, CurrentParserAttrTypes>();
+			auto ret = ParseResult<InputStream, CurrentParserAttrTypes>(input);
 			if (res.success())
 				ret.setResult(res.moveInputStream(), std::make_tuple(std::move(res.moveAttribute())));
 			

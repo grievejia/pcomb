@@ -26,7 +26,7 @@ public:
 	{
 		static_assert(IsInputStream<InputStream>::value, "Parser's input type must be an InputStream!");
 
-		auto ret = ParseResult<InputStream, AttrType>();
+		auto ret = ParseResult<InputStream, AttrType>(input);
 
 		if (!input.isEOF())
 		{

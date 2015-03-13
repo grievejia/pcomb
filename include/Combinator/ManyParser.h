@@ -41,7 +41,7 @@ public:
 			resStream = paResult.moveInputStream();
 		}
 
-		ParseResult<InputStream, AttrType> ret;
+		ParseResult<InputStream, AttrType> ret(input);
 		if (!(nonEmpty && retVec.empty()))
 			ret.setResult(std::move(resStream), std::move(retVec));
 		return ret;

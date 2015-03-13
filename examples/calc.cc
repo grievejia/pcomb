@@ -1,5 +1,5 @@
 #include "pcomb.h"
-#include "InputStream/StringInputStream.h"
+#include "InputStream/PositionedInputStream.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -113,11 +113,12 @@ auto& expr = expr0.setParser(term);
 
 void parseLine(const std::string& line)
 {
-	StringInputStream ss(line);
+	PositionedInputStream ss(line);
 	auto parseResult = expr.parse(ss);
+	auto const& remainingStream = parseResult.getInputStream();
 	if (parseResult.hasError())
 	{
-		std::cout << "Parsing failed\n";
+		std::cout << "Parsing failed at line " << remainingStream.getLineNumber() << ", column " << remainingStream.getColumnNumber() << "\n";
 		return;
 	}
 
@@ -126,10 +127,10 @@ void parseLine(const std::string& line)
 		return inputStrView.substr(std::min(inputStrView.size(), inputStrView.find_first_not_of(" \t\n\v\f\r")));
 	};
 
-	auto remainingBuffer = parseResult.getInputStream().getRawBuffer();
+	auto remainingBuffer = remainingStream.getRawBuffer();
 	if (!lstrip(remainingBuffer).empty())
 	{
-		std::cout << "Excessive input: " << remainingBuffer << "\n";
+		std::cout << "Excessive input: \'" << remainingBuffer << "\' at line " << remainingStream.getLineNumber() << ", column " << remainingStream.getColumnNumber() << '\n';
 		return;
 	}
 

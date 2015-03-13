@@ -29,7 +29,7 @@ public:
 		static_assert(IsInputStream<InputStream>::value, "Parser's input type must be an InputStream!");
 		static_assert(IsParser<ParserA, InputStream>::value, "ManyParser only accepts parser type");
 
-		ParseResult<InputStream, AttrType> ret;
+		ParseResult<InputStream, AttrType> ret(input);
 		auto pResult = parser.parse(input);
 		if (pResult.success())
 			ret.setResult(pResult.moveInputStream(), conv(std::move(pResult.moveAttribute())));

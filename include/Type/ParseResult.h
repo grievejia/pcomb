@@ -11,44 +11,42 @@ template <typename InputType, typename AttrType>
 class ParseResult
 {
 private:
-	std::experimental::optional<std::pair<AttrType, InputType>> result;
+	std::experimental::optional<AttrType> attr;
+	InputType input;
 public:
-	ParseResult() = default;
-	ParseResult(const InputType& i, const AttrType& a): result(std::make_pair(i, a)) {}
-	ParseResult(InputType&& i, AttrType&& a): result(std::make_pair(std::move(i), std::move(a))) {}
+	template <typename I>
+	ParseResult(I&& i): input(std::forward<I>(i)) {}
+	template <typename I, typename A>
+	ParseResult(I&& i, A&& a): input(std::forward<I>(i)), attr(std::forward<A>(a)) {}
 
-	void setResult(const InputType& i, const AttrType& a)
+	template <typename I, typename A>
+	void setResult(I&& i, A&& a)
 	{
-		result = std::make_pair(a, i);
-	}
-	void setResult(InputType&& i, AttrType&& a)
-	{
-		result = std::make_pair(std::move(a), std::move(i));
+		input = std::forward<I>(i);
+		attr = std::forward<A>(a);
 	}
 
-	bool success() const { return static_cast<bool>(result); }
+	bool success() const { return static_cast<bool>(attr); }
 	bool hasError() const { return !success(); }
 
 	const AttrType& getAttribute() const
 	{
 		assert(success());
-		return (*result).first;
+		return (*attr);
 	}
 	AttrType&& moveAttribute()
 	{
 		assert(success());
-		return std::move((*result).first);
+		return std::move(*attr);
 	}
 
 	const InputType& getInputStream() const
 	{
-		assert(success());
-		return (*result).second;
+		return input;
 	}
 	InputType&& moveInputStream()
 	{
-		assert(success());
-		return std::move((*result).second);
+		return std::move(input);
 	}
 };
 
