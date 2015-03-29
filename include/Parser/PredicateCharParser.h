@@ -1,40 +1,38 @@
 #ifndef PCOMB_PREDICATE_CHAR_PARSER_H
 #define PCOMB_PREDICATE_CHAR_PARSER_H
 
+#include "Parser/Parser.h"
 #include "Type/CallableConcept.h"
-#include "Type/InputStreamConcept.h"
-#include "Type/ParseResult.h"
 
 namespace pcomb
 {
 
 // PredicateCharParser matches a char that satisfies a predicate and returns that char as its attribute
 template <typename Pred>
-class PredicateCharParser
+class PredicateCharParser: public Parser<char>
 {
 private:
-	Pred pred;
-public:
 	static_assert(IsCallableWithRetAndArgType<Pred, bool, char>::value, "PredicateCharParser only accepts functors as predicate");
 
-	using AttrType = char;
+	Pred pred;
+public:
+	using OutputType = char;
+	using ResultType = typename Parser<char>::ResultType;
 
+	PredicateCharParser(const Pred& p): pred(p) {}
 	PredicateCharParser(Pred&& p): pred(std::move(p)) {}
 
-	template <typename InputStream>
-	ParseResult<InputStream, AttrType> parse(const InputStream& input) const
+	ResultType parse(const InputStream& input) const override
 	{
-		static_assert(IsInputStream<InputStream>::value, "Parser's input type must be an InputStream!");
-
-		auto ret = ParseResult<InputStream, AttrType>(input);
+		auto ret = ResultType(input);
 
 		if (!input.isEOF())
 		{
 			auto firstChar = input.getRawBuffer()[0];
 			if (pred(firstChar))
-				ret.setResult(input.consume(1), firstChar);
+				ret = ResultType(input.consume(1), firstChar);
 		}
-
+		
 		return ret;
 	}
 };

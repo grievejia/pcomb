@@ -1,31 +1,28 @@
 #ifndef PCOMB_TOKEN_PARSER_H
 #define PCOMB_TOKEN_PARSER_H
 
-#include "Type/InputStreamConcept.h"
-#include "Type/ParserConcept.h"
-#include "Type/ParseResult.h"
+#include "Parser/Parser.h"
 
 namespace pcomb
 {
 
 // TokenParser takes a parser p and strip the whitespace of the input string before feed it into p
 template <typename ParserA>
-class TokenParser
+class TokenParser: public Parser<typename ParserA::OutputType>
 {
 private:
-	ParserA parser;
+	ParserA pa;
 public:
+	static_assert(std::is_base_of<Parser<typename ParserA::OutputType>, ParserA>::value, "TokenParser only accepts parser type");
 
-	using AttrType = ParserAttrType<ParserA>;
+	using OutputType = typename Parser<typename ParserA::OutputType>::OutputType;
+	using ResultType = typename Parser<typename ParserA::OutputType>::ResultType;
 
-	TokenParser(ParserA&& p): parser(std::forward<ParserA>(p)) {}
+	TokenParser(const ParserA& p): pa(p) {}
+	TokenParser(ParserA&& p): pa(std::move(p)) {}
 
-	template <typename InputStream>
-	ParseResult<InputStream, AttrType> parse(const InputStream& input) const
+	ResultType parse(const InputStream& input) const override
 	{
-		static_assert(IsInputStream<InputStream>::value, "Parser's input type must be an InputStream!");
-		static_assert(IsParser<ParserA, InputStream>::value, "ManyParser only accepts parser type");
-
 		auto resStream = input;
 		while (!resStream.isEOF())
 		{
@@ -45,14 +42,15 @@ public:
 			}
 			break;
 		}
-		return parser.parse(resStream);
+		return pa.parse(resStream);
 	}
 };
 
 template <typename ParserA>
-TokenParser<ParserA> token(ParserA&& p)
+auto token(ParserA&& p)
 {
-	return TokenParser<ParserA>(std::forward<ParserA>(p));
+	using ParserType = std::remove_reference_t<ParserA>;
+	return TokenParser<ParserType>(std::forward<ParserA>(p));
 }
 
 }

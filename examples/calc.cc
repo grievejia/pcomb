@@ -1,5 +1,4 @@
 #include "pcomb.h"
-#include "InputStream/PositionedInputStream.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -113,7 +112,7 @@ auto& expr = expr0.setParser(term);
 
 void parseLine(const std::string& line)
 {
-	PositionedInputStream ss(line);
+	InputStream ss(line);
 	auto parseResult = expr.parse(ss);
 	auto const& remainingStream = parseResult.getInputStream();
 	if (parseResult.hasError())
@@ -134,7 +133,7 @@ void parseLine(const std::string& line)
 		return;
 	}
 
-	std::cout << "Result = " << parseResult.getAttribute()->eval() << "\n";
+	std::cout << "Result = " << parseResult.getOutput()->eval() << "\n";
 }
 
 int main()

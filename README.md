@@ -4,8 +4,8 @@ A lightweight parser combinator library written in C++14.
 
 ## Features
 * Efficiency is not the goal of this library. After all, parsing is almost never a perfomrance bottleneck of a program analysis system. 
-* That being said, I try to avoid using heap allocation as much as possible. Most part of the parser is implemented with template metaprogramming instead of class inheritance (the TMP part can be greatly simplified if a future version of C++ compiler/library adds support for Concept). The only exception to this is the LazyParser class, where statically determine the type of its containing subparser is impossible.
-* The library is header-only. This is, of course, a direct consequence of using TMP.
+* That being said, I try to avoid using heap allocation as much as possible. Most part of the parser is implemented with template metaprogramming and a small part is implemented using class inheritance
+* The library is header-only. This is, of course, a direct consequence of TMP.
 * Check examples/calc.cc for a simple calculator example.
 
 ## Usage
@@ -71,4 +71,4 @@ auto& parenChar = parenChar0.set(charOrAnotherParen);
 pcomb relies on the C++14 standard, which means you have to compile it with
   - GCC version >= 4.9
   - Clang version >= 3.4
-pcomb also relies on two experimental C++1z standard library features: option and string_view. Their implementation is available in libstdc++4.9 so if you are on a Linux machine with up-to-date g++ you're going to be fine.
+pcomb also relies on two experimental C++1z standard library features: option and string_view. Their implementation is available in libstdc++4.9 so if you are on a Linux machine with up-to-date g++ you're good to go.

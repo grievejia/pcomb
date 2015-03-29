@@ -1,12 +1,13 @@
-#ifndef PCOMB_POSITIONED_INPUT_STREAM_H
-#define PCOMB_POSITIONED_INPUT_STREAM_H
+#ifndef PCOMB_INPUT_STREAM_H
+#define PCOMB_INPUT_STREAM_H
 
+#include <cassert>
 #include <experimental/string_view>
 
 namespace pcomb
 {
 
-class PositionedInputStream
+class InputStream
 {
 private:
 	struct Position
@@ -17,10 +18,9 @@ private:
 	std::experimental::string_view str;
 	Position pos;
 
-	PositionedInputStream(const std::experimental::string_view& s, const Position& p): str(s), pos(p) {}
+	InputStream(const std::experimental::string_view& s, const Position& p): str(s), pos(p) {}
 public:
-	PositionedInputStream(const char* s): str(s), pos({1, 1}) {}
-	PositionedInputStream(const std::string& s): str(s), pos({1, 1}) {}
+	InputStream(std::experimental::string_view s): str(s), pos({1, 1}) {}
 
 	bool isEOF() const
 	{
@@ -32,7 +32,7 @@ public:
 		return str.data();
 	}
 
-	PositionedInputStream consume(size_t n) const
+	InputStream consume(size_t n) const
 	{
 		assert(n <= str.size());
 		auto newPos = pos;
@@ -47,7 +47,7 @@ public:
 			else
 				++newPos.col;
 		}
-		return PositionedInputStream(str.substr(n), newPos);
+		return InputStream(str.substr(n), newPos);
 	}
 
 	size_t getLineNumber() const { return pos.row; }

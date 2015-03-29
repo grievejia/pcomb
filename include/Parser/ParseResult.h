@@ -1,50 +1,48 @@
 #ifndef PCOMB_PARSE_RESULT_H
 #define PCOMB_PARSE_RESULT_H
 
+#include "InputStream/InputStream.h"
+
 #include <cassert>
 #include <experimental/optional>
 
 namespace pcomb
 {
 
-template <typename InputType, typename AttrType>
+template <typename Out>
 class ParseResult
 {
+public:
+	using OutputType = Out;
 private:
-	std::experimental::optional<AttrType> attr;
-	InputType input;
+	std::experimental::optional<OutputType> attr;
+	InputStream input;
 public:
 	template <typename I>
 	ParseResult(I&& i): input(std::forward<I>(i)) {}
-	template <typename I, typename A>
-	ParseResult(I&& i, A&& a): input(std::forward<I>(i)), attr(std::forward<A>(a)) {}
 
-	template <typename I, typename A>
-	void setResult(I&& i, A&& a)
-	{
-		input = std::forward<I>(i);
-		attr = std::forward<A>(a);
-	}
+	template <typename I, typename O>
+	ParseResult(I&& i, O&& o): input(std::forward<I>(i)), attr(std::forward<O>(o)) {}
 
 	bool success() const { return static_cast<bool>(attr); }
 	bool hasError() const { return !success(); }
 
-	const AttrType& getAttribute() const
+	const OutputType& getOutput() const&
 	{
 		assert(success());
 		return (*attr);
 	}
-	AttrType&& moveAttribute()
+	OutputType&& getOutput() &&
 	{
 		assert(success());
 		return std::move(*attr);
 	}
 
-	const InputType& getInputStream() const
+	const InputStream& getInputStream() const&
 	{
 		return input;
 	}
-	InputType&& moveInputStream()
+	InputStream&& getInputStream() &&
 	{
 		return std::move(input);
 	}
