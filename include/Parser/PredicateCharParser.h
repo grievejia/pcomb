@@ -2,7 +2,6 @@
 #define PCOMB_PREDICATE_CHAR_PARSER_H
 
 #include "Parser/Parser.h"
-#include "Type/CallableConcept.h"
 
 namespace pcomb
 {
@@ -12,8 +11,6 @@ template <typename Pred>
 class PredicateCharParser: public Parser<char>
 {
 private:
-	static_assert(IsCallableWithRetAndArgType<Pred, bool, char>::value, "PredicateCharParser only accepts functors as predicate");
-
 	Pred pred;
 public:
 	using OutputType = char;
