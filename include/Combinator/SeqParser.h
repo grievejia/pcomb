@@ -61,7 +61,8 @@ private:
 			auto prevRes = SeqNParserImpl<Tuple, I-1>::parse(t, input);
 
 			using RetType = typename detail::SeqOutputTypeImpl<Tuple, I>::type;
-			auto ret = ParseResult<RetType>(input);
+			auto ret = ParseResult<RetType>(prevRes.getInputStream());
+
 			if (prevRes.success())
 			{
 				auto curRes = std::get<I-1>(t).parse(prevRes.getInputStream());
@@ -78,7 +79,6 @@ private:
 	{
 		static auto parse(const Tuple& t, const InputStream& input)
 		{
-
 			auto res = std::get<0>(t).parse(input);
 			using RetType = typename detail::SeqOutputTypeImpl<Tuple, 1>::type;
 			auto ret = ParseResult<RetType>(input);

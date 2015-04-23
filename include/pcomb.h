@@ -12,5 +12,6 @@
 #include "Combinator/TokenParser.h"
 #include "Combinator/ParserAdapter.h"
 #include "Combinator/LazyParser.h"
+#include "Combinator/LexemeParser.h"
 
 #endif

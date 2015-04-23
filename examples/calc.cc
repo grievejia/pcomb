@@ -110,26 +110,16 @@ auto term = rule
 
 auto& expr = expr0.setParser(term);
 
-void parseLine(const std::string& line)
+auto parser = line(expr);
+
+void parseLine(const std::string& lineStr)
 {
-	InputStream ss(line);
-	auto parseResult = expr.parse(ss);
-	auto const& remainingStream = parseResult.getInputStream();
+	InputStream ss(lineStr);
+	auto parseResult = parser.parse(ss);
 	if (parseResult.hasError())
 	{
+		auto remainingStream = parseResult.getInputStream();
 		std::cout << "Parsing failed at line " << remainingStream.getLineNumber() << ", column " << remainingStream.getColumnNumber() << "\n";
-		return;
-	}
-
-	auto lstrip = [] (std::experimental::string_view inputStrView)
-	{
-		return inputStrView.substr(std::min(inputStrView.size(), inputStrView.find_first_not_of(" \t\n\v\f\r")));
-	};
-
-	auto remainingBuffer = remainingStream.getRawBuffer();
-	if (!lstrip(remainingBuffer).empty())
-	{
-		std::cout << "Excessive input: \'" << remainingBuffer << "\' at line " << remainingStream.getLineNumber() << ", column " << remainingStream.getColumnNumber() << '\n';
 		return;
 	}
 
@@ -143,13 +133,15 @@ int main()
 	{
 		std::cout << "> ";
 
-		auto line = std::string();
-		std::getline(std::cin, line);
+		auto lineStr = std::string();
+		std::getline(std::cin, lineStr);
 
-		if (line.empty())
+		if (lineStr.empty())
 			break;
 
-		parseLine(line);
+		// getline() won't keep the newline character, which is annoying
+		lineStr.push_back('\n');
+		parseLine(lineStr);
 	}
 	std::cout << "Bye bye!" << std::endl;
 }
