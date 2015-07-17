@@ -7,6 +7,7 @@
 #include "Parser/StringParser.h"
 
 #include "Combinator/AltParser.h"
+#include "Combinator/EnsembleParser.h"
 #include "Combinator/SeqParser.h"
 #include "Combinator/ManyParser.h"
 #include "Combinator/TokenParser.h"

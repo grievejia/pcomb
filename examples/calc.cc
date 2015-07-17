@@ -70,7 +70,7 @@ auto nexpr = alt
 	rule(inum, [] (auto n) -> ExprPtr { return std::make_unique<NumExpr>(n); }),
 	rule
 	(
-		seq(token(ch('(')), expr0, token(ch(')'))),
+		seq(token(ch('(')), expr0.getRef(), token(ch(')'))),
 		[] (auto triple)
 		{
 			return std::move(std::get<1>(triple));
@@ -108,9 +108,9 @@ auto term = rule
 	}
 );
 
-auto& expr = expr0.setParser(term);
+auto expr = expr0.setParser(term);
 
-auto parser = line(expr);
+auto parser = bigstr(expr);
 
 void parseLine(const std::string& lineStr)
 {
@@ -139,8 +139,6 @@ int main()
 		if (lineStr.empty())
 			break;
 
-		// getline() won't keep the newline character, which is annoying
-		lineStr.push_back('\n');
 		parseLine(lineStr);
 	}
 	std::cout << "Bye bye!" << std::endl;

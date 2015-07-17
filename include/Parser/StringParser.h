@@ -20,7 +20,7 @@ public:
 
 	StringParser(StringView s): pattern(s) {}
 
-	ResultType parse(const InputStream& input) const override
+	ResultType parse(const InputStream& input) const override final
 	{
 		auto ret = ResultType(input);
 

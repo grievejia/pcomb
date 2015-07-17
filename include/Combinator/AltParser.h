@@ -72,7 +72,7 @@ private:
 public:
 	AltParser(Parsers&&... ps): parsers(std::forward_as_tuple(ps...)) {}
 
-	ResultType parse(const InputStream& input) const
+	ResultType parse(const InputStream& input) const override final
 	{
 		return AltNParserImpl<std::tuple<Parsers...>, sizeof...(Parsers)>::parse(parsers, input);
 	}

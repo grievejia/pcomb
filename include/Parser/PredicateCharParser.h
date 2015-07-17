@@ -19,7 +19,7 @@ public:
 	PredicateCharParser(const Pred& p): pred(p) {}
 	PredicateCharParser(Pred&& p): pred(std::move(p)) {}
 
-	ResultType parse(const InputStream& input) const override
+	ResultType parse(const InputStream& input) const override final
 	{
 		auto ret = ResultType(input);
 

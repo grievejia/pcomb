@@ -13,6 +13,8 @@ template <typename ParserA>
 class TokenParser: public Parser<typename ParserA::OutputType>
 {
 private:
+	static_assert(std::is_base_of<Parser<typename ParserA::OutputType>, ParserA>::value, "TokenParser only accepts parser type");
+
 	auto static constexpr CharSize = sizeof(char) * 8;
 
 	ParserA pa;
@@ -38,7 +40,7 @@ public:
 		setCharBits(w);
 	}
 
-	ResultType parse(const InputStream& input) const override
+	ResultType parse(const InputStream& input) const override final
 	{
 		auto resStream = input;
 

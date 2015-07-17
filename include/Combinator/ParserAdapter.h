@@ -23,7 +23,7 @@ public:
 	template <typename PA, typename C>
 	ParserAdapter(PA&& p, C&& c): pa(std::forward<PA>(p)), conv(std::forward<C>(c)) {}
 
-	ResultType parse(const InputStream& input) const override
+	ResultType parse(const InputStream& input) const override final
 	{
 		auto pResult = pa.parse(input);
 		auto ret = ResultType(pResult.getInputStream());

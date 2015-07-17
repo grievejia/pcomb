@@ -24,7 +24,7 @@ public:
 	ManyParser(const ParserA& a, unsigned n = 0): pa(a), minOccurrence(n) {}
 	ManyParser(ParserA&& a, unsigned n = 0): pa(std::move(a)), minOccurrence(n) {}
 
-	ResultType parse(const InputStream& input) const override
+	ResultType parse(const InputStream& input) const override final
 	{
 		auto retVec = OutputType();
 		auto resStream = input;
