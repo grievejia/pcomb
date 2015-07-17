@@ -15,8 +15,8 @@ class ParseResult
 public:
 	using OutputType = Out;
 private:
+    InputStream input;
 	std::experimental::optional<OutputType> attr;
-	InputStream input;
 public:
 	template <typename I>
 	ParseResult(I&& i): input(std::forward<I>(i)) {}
