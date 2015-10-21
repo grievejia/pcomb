@@ -27,11 +27,11 @@ public:
 		auto ret = ResultType(input);
 
 		auto res = std::cmatch();
-		auto rawStr = input.getRawBuffer();
-		if (std::regex_search(rawStr, res, regex, std::regex_constants::match_continuous))
+		auto inputView = input.getInputStringView();
+		if (std::regex_search(inputView.begin(), inputView.end(), res, regex, std::regex_constants::match_continuous))
 		{
 			auto matchLen = res.length(0);
-			ret = ResultType(input.consume(matchLen), StringView(rawStr, matchLen));
+			ret = ResultType(input.consume(matchLen), inputView.substr(0, matchLen));
 		}
 		
 		return ret;

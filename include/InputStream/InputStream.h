@@ -27,6 +27,11 @@ public:
 		return str.empty();
 	}
 
+	std::experimental::string_view getInputStringView() const
+	{
+		return str;
+	}
+
 	const char* getRawBuffer() const
 	{
 		return str.data();
